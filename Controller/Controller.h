@@ -1,24 +1,19 @@
 #ifndef CONTROLLER_H
 #define CONTROLLER_H
 
+#include "../Model.h"
 #include <iostream>
-#include <WinSock2.h>
-#include <ws2tcpip.h>
-#pragma comment(lib, "ws2_32.lib")
-#pragma warning(disable: 4996)
 
 using namespace std;
 
-enum State_of_game {
-	// Начало игры
-	allocation,
-	// Игра идёт
-	move,
-	wait,
-	// Игра завершена успешно
-	win,
-	// Игра завершена неудачно
-	lose
+enum State_of_game 
+{
+	connection,	// Подключение
+	allocation,	// Расстановка
+	move,		// Ход
+	wait,		// Ожидание
+	win,		// Победа
+	lose		// Поражение
 };
 
 
@@ -35,17 +30,16 @@ protected:
 
 	static Controller* instance;
 
-	//Model* Model_of_game;
-
 public:
-	// создаёт и инициализирует новый игровой контекст
 	Controller();
-	// освобождает занятые ресурсы
 	~Controller();
-	// единственный экземпляр класса
 
 	virtual bool sended() = 0;
 	virtual bool recved() = 0;
+
+	virtual void ClickLeft(int x, int y) = 0;
+
+	//virtual void ClickRight(int x, int y);
 };
 
 
