@@ -1,8 +1,7 @@
 #include "Server.h"
 
-Server::Server(Model* _Model_of_game)
+Server::Server()
 {
-	_Model = _Model_of_game;
 	WSAData wsaData;
 	WORD DLLVersion = MAKEWORD(2, 1);
 	if ((WSAStartup(DLLVersion, &wsaData)) != 0)
@@ -66,7 +65,7 @@ Server::Server(Model* _Model_of_game)
 	bind(sListen, (SOCKADDR*)&address, size_of_address);
 	listen(sListen, SOMAXCONN);
 
-//	Connection = accept(sListen, (SOCKADDR*)&address, &size_of_address);
+	Connection = accept(sListen, (SOCKADDR*)&address, &size_of_address);
 	if (Connection)
 		cout << "++" << endl;
 	else
@@ -75,7 +74,6 @@ Server::Server(Model* _Model_of_game)
 
 Server::~Server()
 {
-	_Model = nullptr;
 }
 
 bool Server::sended()
@@ -98,63 +96,4 @@ bool Server::recved()
 	if (strcmp(msg, "STOP"))
 		return 1;
 	else return 0;
-}
-
-void Server::ClickLeft(int x, int y)
-{
-	/*if (state == allocation)
-	{
-		int vertical = ((y - MARGIN_TOP) / CELL_SIZE);
-		int horisontal = ((x - MARGIN_LEFT) / CELL_SIZE);
-		if (vertical < 0 || vertical >= 10 || horisontal < 0 || horisontal >= 10)
-			return;
-	}
-	else
-	{
-		int vertical = ((y - MARGIN_TOP) / CELL_SIZE);
-		int horisontal = ((x - 2 * MARGIN_LEFT - 10 * CELL_SIZE) / CELL_SIZE);
-		if (vertical < 0 || vertical >= 10 || horisontal < 0 || horisontal >= 10)
-			return;
-
-		if (state == 1)
-		{
-			if (Hit(_Model->field_client, horisontal, vertical))
-				state = wait;
-		}
-	}*/
-	int vertical = ((y - MARGIN_TOP) / CELL_SIZE);
-	int horisontal = ((x - MARGIN_LEFT) / CELL_SIZE);
-	if (vertical < 0 || vertical >= 10 || horisontal < 0 || horisontal >= 10 || x < MARGIN_LEFT || y < MARGIN_TOP)
-		return;
-	Hit(_Model->field_server, horisontal, vertical);
-
-}
-
-void Server::OnServerField(int vertical, int horisontal)
-{
-}
-
-int Server::Hit(int** field, int x, int y)
-{
-	/*if (field[x][y] == located)
-	{
-		field[x][y] = damaged;
-		return 1;
-	}
-	if (field[x][y] == 0)
-	{
-		field[x][y] = miss;
-		return 0;
-	}*/
-	switch (field[x][y])
-	{
-	case empt: _Model->set_on_field('s', x, y, 1); break;
-	case located: _Model->set_on_field('s', x, y, 2); break;
-	case damaged: _Model->set_on_field('s', x, y, 3); break;
-	case miss: _Model->set_on_field('s', x, y, 4); break;
-	case kill: _Model->set_on_field('s', x, y, 0); break;
-	default:
-		break;
-	}
-	return 1;
 }
