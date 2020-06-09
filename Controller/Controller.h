@@ -33,6 +33,7 @@ protected:
 	int prevy3;
 	SOCKADDR_IN address;
 	SOCKET Connection;
+	Model* _Model;
 	
 	static Controller* instance;
 
@@ -45,6 +46,7 @@ public:
 	virtual bool recved() = 0;
 	virtual void Located(int** field, int x, int y) = 0;
 	virtual int Hit(int** field, int x, int y) = 0;
+	void Reset();
 	virtual void ClickLeft(int x, int y) = 0;
 
 	//virtual void ClickRight(int x, int y);

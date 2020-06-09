@@ -130,7 +130,13 @@ void Server::ClickLeft(int x, int y)
 	case start: 
 		break;
 	case connection:  break;
-	case allocation:   
+	case allocation:
+		if ((x > MARGIN_LEFT + 10 * CELL_SIZE + 100) && (x < MARGIN_LEFT + 10 * CELL_SIZE + 600) &&
+			(y > MARGIN_TOP) && (y > MARGIN_TOP + 210))
+		{
+			Reset();
+			break;
+		}
 		vertical = ((y - MARGIN_TOP) / CELL_SIZE);
 		horisontal = ((x - MARGIN_LEFT) / CELL_SIZE);
 		if (vertical < 0 || vertical >= 10 || horisontal < 0 || horisontal >= 10 || x < MARGIN_LEFT || y < MARGIN_TOP)
@@ -155,6 +161,8 @@ void Server::ClickLeft(int x, int y)
 
 void Server::Located(int** field, int x, int y)
 {
+	if (_Model->get_from_field('m', x, y) == located)
+		return;
 	if (stay == 0)
 	{
 		int cnt = 0;
@@ -187,7 +195,7 @@ void Server::Located(int** field, int x, int y)
 		case 9: stay = 1; break;
 		case 10: 
 			_Model->set_heals('m', 20);
-			state = allocation;
+			state = wait;
 			break;
 		default:
 			break;

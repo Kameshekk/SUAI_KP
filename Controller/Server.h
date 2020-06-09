@@ -8,7 +8,6 @@ class Server : public Controller
 {
 	SOCKET sListen;
 	SOCKET Connection;
-	Model* _Model;
 public:
 	Server(Model* _Model_of_game);
 	~Server();
