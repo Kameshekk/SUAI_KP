@@ -3,22 +3,22 @@
 Model::Model(HWND _hWnd)
 {
 	hWnd = _hWnd;
-	heals_server = 20;
-	heals_client = 20;
-	field_server = new int*[10];
+	heals_my = 0;
+	heals_his = 20;
+	field_my = new int*[10];
 	for (int i = 0; i < 10; i++)
 	{
-		field_server[i] = new int[10];
+		field_my[i] = new int[10];
 		for (int j = 0; j < 10; j++)
-			field_server[i][j] = empt;
+			field_my[i][j] = empt;
 	}
 
-	field_client = new int* [10];
+	field_his = new int* [10];
 	for (int i = 0; i < 10; i++)
 	{
-		field_client[i] = new int[10];
+		field_his[i] = new int[10];
 		for (int j = 0; j < 10; j++)
-			field_client[i][j] = empt;
+			field_his[i][j] = empt;
 	}
 }
 
@@ -26,12 +26,12 @@ Model::Model(HWND _hWnd)
 Model::~Model()
 {
 	for (int i = 0; i < 10; i++)
-		delete[] field_server[i];
-	delete[] field_server;
+		delete[] field_my[i];
+	delete[] field_my;
 
 	for (int i = 0; i < 10; i++)
-		delete[] field_client[i];
-	delete[] field_client;
+		delete[] field_his[i];
+	delete[] field_his;
 }
 
 bool Model::check()
@@ -43,18 +43,41 @@ bool Model::check()
 	return false;
 }
 
+void Model::set_heals(char who, int health)
+{
+	switch (who)
+	{
+	case 'm': heals_my = health; break;
+	case 'h': heals_his = health; break;
+	default:
+		break;
+	}
+}
+
+int Model::get_heals(char who)
+{
+	switch (who)
+	{
+	case 'm': return heals_my; break;
+	case 'h': return heals_his; break;
+	default:
+		break;
+	}
+	return 0;
+}
+
 int Model::set_on_field(char who, int horizontal, int vertical, int set_cell)
 {
 	int tmp = 0;
 	switch (who)
 	{
-	case 's': 
-		tmp = field_server[horizontal][vertical];
-		field_server[horizontal][vertical] = set_cell;
+	case 'm': 
+		tmp = field_my[horizontal][vertical];
+		field_my[horizontal][vertical] = set_cell;
 		break;
-	case 'c':
-		tmp = field_server[horizontal][vertical];
-		field_server[horizontal][vertical] = set_cell;
+	case 'h':
+		tmp = field_his[horizontal][vertical];
+		field_his[horizontal][vertical] = set_cell;
 		break;
 	default:
 		return -1;
@@ -62,4 +85,22 @@ int Model::set_on_field(char who, int horizontal, int vertical, int set_cell)
 	}
 	UpdateWindow(hWnd);
 	return tmp;
+}
+
+int Model::get_from_field(char who, int horizontal, int vertical)
+{
+	if (horizontal < 0 || vertical < 0 || horizontal > 9 || vertical > 9)
+		return empt;
+	switch (who)
+	{
+	case 'm':
+		return (field_my[horizontal][vertical]);
+		break;
+	case 'h':
+		return (field_his[horizontal][vertical]);;
+		break;
+	default:
+		return -1;
+		break;
+	}
 }

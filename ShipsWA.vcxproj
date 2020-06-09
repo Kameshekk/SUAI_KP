@@ -157,12 +157,6 @@
   <ItemGroup>
     <ResourceCompile Include="ShipsWA.rc" />
   </ItemGroup>
-  <ItemGroup>
-    <Image Include="..\..\..\..\OneDrive\Рабочий стол\002.bmp" />
-    <Image Include="background.bmp" />
-    <Image Include="bitmap2.bmp" />
-    <Image Include="bitmap3.bmp" />
-  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

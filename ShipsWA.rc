@@ -1,6 +1,6 @@
 // Microsoft Visual C++ generated resource script.
 //
-#include "resource.h"
+#include "resource2.h"
 
 #define APSTUDIO_READONLY_SYMBOLS
 /////////////////////////////////////////////////////////////////////////////
@@ -27,7 +27,7 @@ LANGUAGE LANG_RUSSIAN, SUBLANG_DEFAULT
 
 1 TEXTINCLUDE 
 BEGIN
-    "resource.h\0"
+    "resource2.h\0"
 END
 
 2 TEXTINCLUDE 
@@ -50,20 +50,6 @@ END
 // Menu
 //
 
-IDR_MENU1 MENU
-BEGIN
-    MENUITEM SEPARATOR
-END
-
-
-/////////////////////////////////////////////////////////////////////////////
-//
-// Bitmap
-//
-
-IDB_BITMAP1             BITMAP                  "C:\\Users\\DanGo\\source\\repos\\ShipsWA\\ShipsWA\\background.bmp"
-
-IDB_BITMAP2             BITMAP                  "bitmap2.bmp"
 
 
 /////////////////////////////////////////////////////////////////////////////
@@ -74,7 +60,7 @@ IDB_BITMAP2             BITMAP                  "bitmap2.bmp"
 STRINGTABLE
 BEGIN
     IDS_TITLE               "Naval battle"
-    IDS_SHIPS               "NavalBattleClass"
+    IDS_SHIPS               "Ship"
 END
 
 #endif    // Русский (Россия) resources

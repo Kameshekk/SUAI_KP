@@ -15,9 +15,10 @@ public:
 	bool sended();
 	bool recved();
 	void ClickLeft(int x, int y);
-	void OnServerField(int vertical, int horisontal);
-	void OnClientField(int vertical, int horisontal);
+	void Located(int** field, int x, int y);
 	int Hit(int** field, int x, int y);
+	int check_on_kill(int field[10][10], int x, int y);
+	void kills(char who, int x, int y);
 };
 
 #endif

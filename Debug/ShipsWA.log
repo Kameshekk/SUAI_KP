@@ -1,12 +1,14 @@
 ﻿  Client.cpp
   Controller.cpp
   Server.cpp
+  Model.cpp
+  View.cpp
   main.cpp
-C:\Users\DanGo\source\repos\ShipsWA\ShipsWA\main.cpp(164,11): warning C4101: hdcMem: неиспользованная локальная переменная
-C:\Users\DanGo\source\repos\ShipsWA\ShipsWA\main.cpp(165,9): warning C4101: bm: неиспользованная локальная переменная
-C:\Users\DanGo\source\repos\ShipsWA\ShipsWA\main.cpp(167,14): warning C4101: ps: неиспользованная локальная переменная
-C:\Users\DanGo\source\repos\ShipsWA\ShipsWA\main.cpp(164,6): warning C4101: hDC: неиспользованная локальная переменная
-C:\Users\DanGo\source\repos\ShipsWA\ShipsWA\main.cpp(168,10): warning C4101: hBitMap: неиспользованная локальная переменная
-C:\Users\DanGo\source\repos\ShipsWA\ShipsWA\main.cpp(166,10): warning C4101: hbmOld: неиспользованная локальная переменная
+C:\Users\DanGo\source\repos\ShipsWA\ShipsWA\main.cpp(163,11): warning C4101: hdcMem: неиспользованная локальная переменная
+C:\Users\DanGo\source\repos\ShipsWA\ShipsWA\main.cpp(164,9): warning C4101: bm: неиспользованная локальная переменная
+C:\Users\DanGo\source\repos\ShipsWA\ShipsWA\main.cpp(166,14): warning C4101: ps: неиспользованная локальная переменная
+C:\Users\DanGo\source\repos\ShipsWA\ShipsWA\main.cpp(163,6): warning C4101: hDC: неиспользованная локальная переменная
+C:\Users\DanGo\source\repos\ShipsWA\ShipsWA\main.cpp(167,10): warning C4101: hBitMap: неиспользованная локальная переменная
+C:\Users\DanGo\source\repos\ShipsWA\ShipsWA\main.cpp(165,10): warning C4101: hbmOld: неиспользованная локальная переменная
   Создание кода...
   ShipsWA.vcxproj -> C:\Users\DanGo\source\repos\ShipsWA\Debug\ShipsWA.exe

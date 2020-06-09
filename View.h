@@ -21,17 +21,13 @@ public:
 	View(Model* _Model_of_game);
 	~View();
 	// Отображает игровое поле в указанном графическом контексте
-	void Draw(HDC hdc);
-
-	// Обрабатывает нажатие на левую кнопку мыши
-	void ClickLeft(int x, int y);
-	// Обрабатывает нажатие на правую кнопку мыши
-	void ClickRight(int x, int y);
-
-	// Возвращает необходимую ширину графического контекста
-	int GetWidth();
-	// Возвращает необходимую высоту графического контекста
-	int GetHeight();
+	void Draw_Start(HDC hdc, RECT& rect);
+	void Draw_Connection(HDC hdc);
+	void Draw_Allocation(HDC hdc);
+	void Draw_Move(HDC hdc);
+	void Draw_Wait(HDC hdc);
+	void Draw_Win(HDC hdc);
+	void Draw_Lose(HDC hdc);
 };
 
 

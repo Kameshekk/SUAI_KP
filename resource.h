@@ -2,14 +2,12 @@
 // Включаемый файл, созданный в Microsoft Visual C++.
 // Используется ShipsWA.rc
 //
-#define IDS_TITLE                       104
-#define IDS_SHIPS                       105
-#define IDR_MENU1                       105
-#define IDB_BITMAP1                     106
-#define IDB_BITMAP2                     107
-
+#define IDS_TITLE                       101
+#define IDS_SHIPS                       102
 // Next default values for new objects
 // 
+int Game_state;
+
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        112

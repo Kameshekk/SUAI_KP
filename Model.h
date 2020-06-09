@@ -9,12 +9,12 @@
 #pragma warning(disable: 4996)
 //#include "View.h"
 
-#define WIDTH 900
-#define HEIGHT 450
+#define WIDTH 1200
+#define HEIGHT 600
 
-#define MARGIN_TOP 75
-#define MARGIN_LEFT 75
-#define MARGIN_BETWEEN_FIELDS 150
+#define MARGIN_TOP 100
+#define MARGIN_LEFT 150
+#define MARGIN_BETWEEN_FIELDS 300
 
 #define CELL_SIZE 30
 
@@ -35,15 +35,17 @@ class Model
     HWND hWnd;
 public:
     //Ship_state state_ship;
-    int heals_server;
-    int heals_client;
-    int** field_server;
-    int** field_client;
+    int heals_my;
+    int heals_his;
+    int** field_my;
+    int** field_his;
     Model(HWND _hWnd);
     ~Model();
     bool check();
+    void set_heals(char who, int health);
+    int get_heals(char who);
     int set_on_field(char who, int horizontal, int vertical, int set_cell);
-    int get_from_field(char who, int horizontal, int vertical, int set_cell);
+    int get_from_field(char who, int horizontal, int vertical);
 };
 
 #endif

@@ -10,7 +10,6 @@
 // main.cpp : Defines the entry point for the application.
 //
 
-//#include "framework.h"
 #include "resource.h"
 
 
@@ -45,8 +44,8 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	UNREFERENCED_PARAMETER(lpCmdLine);
 
 	// »нициализируем глобальные переменные
-	LoadStringW(hInstance, IDS_TITLE, szTitle, MAX_LOADSTRING);	// ¬ставить название окна
-	LoadStringW(hInstance, IDS_SHIPS, szWindowClass, MAX_LOADSTRING);
+	LoadStringW(hInstance, IDS_TITLE, szTitle, MAX_LOADSTRING);	// ¬ставить название окна	// ѕќћ≈Ќя“№!!!!!!!!!!!!!!!!!!!!!!!!!
+	LoadStringW(hInstance, IDS_SHIPS, szWindowClass, MAX_LOADSTRING);	// ѕќћ≈Ќя“№!!!!!!!!!!!!!!!!!!!!!!!!!
 	MyRegisterClass(hInstance);
 
 	// Perform application initialization:
@@ -76,7 +75,11 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 
 
 
-
+//
+//  FUNCTION: MyRegisterClass()
+//
+//  PURPOSE: Registers the window class.
+//
 ATOM MyRegisterClass(HINSTANCE hInstance)
 {
 	WNDCLASSEXW wcex;
@@ -91,7 +94,7 @@ ATOM MyRegisterClass(HINSTANCE hInstance)
 	wcex.hIcon = NULL; //LoadIcon(hInstance, MAKEINTRESOURCE(IDI_SMALL));
 	wcex.hCursor = LoadCursor(nullptr, IDC_ARROW);
 	wcex.hbrBackground = (HBRUSH)(COLOR_WINDOW + 1);
-	wcex.lpszMenuName = MAKEINTRESOURCEW(IDS_SHIPS);
+	wcex.lpszMenuName = MAKEINTRESOURCEW(IDS_SHIPS);	// ѕќћ≈Ќя“№!!!!!!!!!!!!!!!!!!!!!!!!!
 	wcex.lpszClassName = szWindowClass;
 	wcex.hIconSm = NULL; // LoadIcon(wcex.hInstance, MAKEINTRESOURCE(IDI_SMALL));
 
@@ -113,8 +116,7 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 	hInst = hInstance; // Store instance handle in our global variable
 
 	HWND hWnd = CreateWindowW(szWindowClass, szTitle, WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX,
-		CW_USEDEFAULT, 0, CW_USEDEFAULT, 0, nullptr, nullptr, hInstance, nullptr);
-
+		CW_USEDEFAULT, 0, WIDTH, HEIGHT, nullptr, nullptr, hInstance, nullptr);
 	if (!hWnd)
 	{
 		return FALSE;
@@ -126,29 +128,13 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 	return TRUE;
 }
 
-void SetClientSize(HWND hwnd, int clientWidth, int clientHeight)
-{
-	if (IsWindow(hwnd))
-	{
-		RECT newClientRC;
-		GetClientRect(hwnd, &newClientRC);
-		if ((newClientRC.right - newClientRC.left) == clientWidth &&
-			(newClientRC.bottom - newClientRC.top) == clientHeight)
-			return;
 
-		DWORD dwStyle = GetWindowLongPtr(hwnd, GWL_STYLE);
-		DWORD dwExStyle = GetWindowLongPtr(hwnd, GWL_EXSTYLE);
-		HMENU menu = GetMenu(hwnd);
-
-		RECT rc = { 0, 0, clientWidth, clientHeight };
-
-		AdjustWindowRectEx(&rc, dwStyle, menu ? TRUE : FALSE, dwExStyle);
-
-		SetWindowPos(hwnd, NULL, 0, 0, rc.right - rc.left, rc.bottom - rc.top,
-			SWP_NOZORDER | SWP_NOMOVE);
-	}
-}
-
+//
+//  FUNCTION: WndProc(HWND, UINT, WPARAM, LPARAM)
+//
+//  PURPOSE: Processes messages for the main window.
+//
+//
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
 	HDC hDC, hdcMem;
@@ -161,14 +147,73 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 	case WM_CREATE:
 		_Model = new Model(hWnd);
 		_Controller = new Server(_Model);
-		_View = new View(_Model);
+		_View = new View(_Model); 
+		_Controller->set_state(start);
+
+		static HWND OK = CreateWindow("BUTTON", "Game", WS_CHILD | WS_VISIBLE, 550, 500, 100, 30, hWnd, (HMENU)1001, hInst, NULL);
+		//GameContext::GetInstance()->Reset();
+		//GameContext::GetInstance()->SeedRandom(time(0));
+		//SetTimer(hWnd, IDT_STEP_TIMER, 200, NULL);
 		
 		break;
 
+	case WM_COMMAND:
+	{
+		int wmId = LOWORD(wParam);
+		if (wParam == 1001)
+		{
+			switch (_Controller->get_state())
+			{
+			case start: _Controller->set_state(allocation); break;
+			case allocation: _Controller->set_state(mov); break;
+			case mov: _Controller->set_state(wait); break;
+			case wait: _Controller->set_state(start); break;
+
+			default:
+				break;
+			}
+			//DestroyWindow(OK);
+		}
+		UpdateWindow(hWnd);
+	}
 	break;
+	/*case WM_LBUTTONDOWN:
+		HDC hdc = GetDC(hWnd);
+		POINT pt;
+		RECT rect;
+		static POINT dif;
+		static POINT str_pt{ 0,0 };
+		RECT str_rect;
+		SIZE str_sz;
+		GetCursorPos(&pt);
+		ScreenToClient(hWnd, &pt);
+		SetRect(&str_rect, str_pt.x, str_pt.y, 4*CELL_SIZE, CELL_SIZE);
+
+		if (PtInRect(&str_rect, pt))
+			SetTimer(hWnd, 2, 16, 0);
+		ReleaseDC(hWnd, hdc);
+		dif.x = pt.x - str_pt.x;
+		dif.y = pt.y - str_pt.y;
+		break;
+	case WM_TIMER:
+		GetClientRect(hWnd, &rect);
+		GetCursorPos(&str_pt);
+		str_pt.x -= dif.x;
+		str_pt.y -= dif.y;
+		ScreenToClient(hWnd, &str_pt);
+		InvalidateRect(hWnd, 0, 1);
+		break;
+	case WM_LBUTTONUP:
+		KillTimer(hWnd, 2);
+		break;
+	case WM_MOVE:
+		
+		
+		break;*/
 	case WM_PAINT:
 	{
-		
+		//SetClientSize(hWnd, gameUI->GetWidth(), gameUI->GetHeight());
+
 		PAINTSTRUCT ps;
 		HDC hdc = BeginPaint(hWnd, &ps);
 
@@ -188,8 +233,22 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		// in order to avoid GDI leaks!
 		HBITMAP oldBmp = (HBITMAP)SelectObject(memDC, bmp);
 		PatBlt(memDC, 0, 0, 1550, 800, WHITENESS);
-		_View->Draw(memDC);
 
+		switch (_Controller->get_state())
+		{
+		case start: _View->Draw_Start(memDC, rcClientRect); break;
+		case connection: _View->Draw_Start(memDC, rcClientRect); break;
+		case allocation:  _View->Draw_Allocation(memDC); break;
+		case mov: _View->Draw_Move(memDC); break;
+		case wait: _View->Draw_Move(memDC); break;
+		case win: _View->Draw_Move(memDC); break;
+		case lose: _View->Draw_Move(memDC); break;
+		default:
+			break;
+		}
+		//_View->Draw_Move(memDC);
+
+		
 		// OK, everything is drawn into memory DC, 
 		// now is the time to draw that final result into our target DC
 
@@ -201,6 +260,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		DeleteObject(bmp); // delete bitmap since it is no longer required
 		DeleteDC(memDC);   // delete memory DC since it is no longer required
 		EndPaint(hWnd, &ps); //завершение рисовани€
+		//HWND OK = CreateWindow("BUTTON","Game",WS_CHILD | WS_VISIBLE, 550, 500, 100, 30, hWnd, (HMENU)1001, hInst, NULL);
 	}
 	break;
 	case WM_DESTROY:
@@ -214,14 +274,30 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		InvalidateRect(hWnd, NULL, false);
 	}
 	break;
-	case WM_RBUTTONDOWN:
-	{
-		
-	}
-	break;
+	
 	default:
 		return DefWindowProc(hWnd, message, wParam, lParam);
 		system("pause");
 	}
 	return 0;
+}
+
+// Message handler for about box.
+INT_PTR CALLBACK About(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
+{
+	UNREFERENCED_PARAMETER(lParam);
+	switch (message)
+	{
+	case WM_INITDIALOG:
+		return (INT_PTR)TRUE;
+
+	case WM_COMMAND:
+		if (LOWORD(wParam) == IDOK || LOWORD(wParam) == IDCANCEL)
+		{
+			EndDialog(hDlg, LOWORD(wParam));
+			return (INT_PTR)TRUE;
+		}
+		break;
+	}
+	return (INT_PTR)FALSE;
 }
