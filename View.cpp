@@ -6,18 +6,17 @@ View::View(Model* _Model_of_game)
 	_Model = _Model_of_game;
 }
 
-void View::Draw_Move(HDC hdc)
+void View::Draw(HDC hdc, RECT& rect, char select)
 {
 
 
-	HBRUSH ClozeBrush = CreateSolidBrush(RGB(128, 128, 255));	// Закрытая клетка
-	HBRUSH OurShipBrush = CreateSolidBrush(RGB(255, 0, 255)); // Свой корабль
-	HBRUSH EnemyShipBrush = CreateSolidBrush(RGB(255, 0, 0));	// Вражеский корабль
-	HBRUSH HitOfOurShip = CreateSolidBrush(RGB(255, 128, 0));	// Поврежденный свой
-	HBRUSH HitOfEnemyShip = CreateSolidBrush(RGB(64, 64, 0));	// Поврежденный вражеский
-	HBRUSH KillOfOurShip = CreateSolidBrush(RGB(20, 120, 20));	// Потопленный свой
-	HBRUSH KillOfEnemyShip = CreateSolidBrush(RGB(120, 20, 20));	// Потопленный вражеский
-	HBRUSH MissBrush = CreateSolidBrush(RGB(0, 192, 64));	// Промах
+	HBRUSH ClozeBrush = CreateSolidBrush(RGB(135, 206, 250));	// Закрытая клетка
+	HBRUSH OurShipBrush = CreateSolidBrush(RGB(0, 255, 0)); // Свой корабль
+	HBRUSH HitOfOurShip = CreateSolidBrush(RGB(85, 107, 47));	// Поврежденный свой
+	HBRUSH HitOfEnemyShip = CreateSolidBrush(RGB(255, 127, 80));	// Поврежденный вражеский
+	HBRUSH KillOfOurShip = CreateSolidBrush(RGB(22, 44, 0));	// Потопленный свой
+	HBRUSH KillOfEnemyShip = CreateSolidBrush(RGB(52, 0, 18));	// Потопленный вражеский
+	HBRUSH MissBrush = CreateSolidBrush(RGB(0, 0, 255));	// Промах
 	wchar_t c[1];
 	wchar_t num[1];
 	c[0] = 'A';
@@ -25,7 +24,6 @@ void View::Draw_Move(HDC hdc)
 	for (int vertical = 0; vertical < 10; vertical++) 
 	{
 		TextOut(hdc, MARGIN_LEFT - CELL_SIZE / 2, MARGIN_TOP + vertical * CELL_SIZE + CELL_SIZE/4, (LPCSTR)c, 1);
-		//DrawText(hdc, (LPCSTR)c, cchText, lprc, format);
 		
 		c[0]++;
 		for (int horizontal = 0; horizontal < 10; horizontal++)
@@ -41,7 +39,7 @@ void View::Draw_Move(HDC hdc)
 			int bottom = vertical * CELL_SIZE + CELL_SIZE + MARGIN_TOP;
 
 			SelectBrush(hdc, ClozeBrush);
-			switch (_Model->field_my[horizontal][vertical])
+			switch (_Model->get_from_field('m', horizontal, vertical))
 			{
 			case empt: SelectBrush(hdc, ClozeBrush); break;
 			case located: SelectBrush(hdc, OurShipBrush); break;
@@ -76,10 +74,9 @@ void View::Draw_Move(HDC hdc)
 			int bottom = vertical * CELL_SIZE + CELL_SIZE + MARGIN_TOP;
 
 			SelectBrush(hdc, ClozeBrush);
-			switch (_Model->field_his[horizontal][vertical])
+			switch (_Model->get_from_field('h', horizontal, vertical))
 			{
 			case empt: SelectBrush(hdc, ClozeBrush); break;
-			case located: SelectBrush(hdc, EnemyShipBrush); break;
 			case damaged: SelectBrush(hdc, HitOfEnemyShip); break;
 			case kill: SelectBrush(hdc, KillOfEnemyShip); break;
 			case miss: SelectBrush(hdc, MissBrush); break;
@@ -91,9 +88,36 @@ void View::Draw_Move(HDC hdc)
 
 		}
 	}
+	HFONT hFont = CreateFont(80, 0, 0, 0, 0, 0, 0, 0, DEFAULT_CHARSET, 0, 0, 0, VARIABLE_PITCH, "Arial Bold");	
+	SelectObject(hdc, hFont);
+	if(select == 'w')
+		DrawText(hdc, "Wait", -1, &rect, DT_CENTER);
+	else
+		DrawText(hdc, "Move", -1, &rect, DT_CENTER);
+	DeleteFont(hFont);
+
+	hFont = CreateFont(40, 0, 0, 0, 0, 0, 0, 0, DEFAULT_CHARSET, 0, 0, 0, VARIABLE_PITCH, "Arial Bold");	
+	SelectObject(hdc, hFont);
+	DrawText(hdc, "\n\n\n\n\nHealth:", -1, &rect, DT_CENTER);
+	DeleteFont(hFont);
+
+	char Health_his[3];
+	char Health[7];
+	
+	_itoa_s(_Model->get_heals('m'), Health, sizeof(Health), 10);
+	_itoa_s(_Model->get_heals('h'), Health_his, sizeof(Health_his), 10);
+	strcat(Health, ":");
+	strcat(Health, Health_his);
+
+
+
+	hFont = CreateFont(40, 0, 0, 0, 0, 0, 0, 0, DEFAULT_CHARSET, 0, 0, 0, VARIABLE_PITCH, "Arial Bold");	
+	SelectObject(hdc, hFont);
+	DrawText(hdc, Health, -1, &rect, DT_SINGLELINE | DT_CENTER | DT_VCENTER);
+	DeleteFont(hFont);
+
 	DeleteBrush(ClozeBrush);
 	DeleteBrush(OurShipBrush);
-	DeleteBrush(EnemyShipBrush);
 	DeleteBrush(HitOfOurShip);
 	DeleteBrush(HitOfEnemyShip);
 	DeleteBrush(KillOfOurShip);
@@ -101,9 +125,6 @@ void View::Draw_Move(HDC hdc)
 	DeleteBrush(MissBrush);
 }
 
-void View::Draw_Wait(HDC hdc)
-{
-}
 
 void View::Draw_Win(HDC hdc)
 {
@@ -113,7 +134,7 @@ void View::Draw_Lose(HDC hdc)
 {
 }
 
-void View::Draw_Start(HDC hdc, RECT &rect)
+void View::Draw_Start(HDC hdc)
 {
 	HBRUSH ServerBrush = CreateSolidBrush(RGB(128, 128, 240));
 	HBRUSH ClientBrush = CreateSolidBrush(RGB(240, 128, 128));
@@ -164,17 +185,42 @@ void View::Draw_Start(HDC hdc, RECT &rect)
 	DeleteBrush(ClientBrush);
 }
 
-void View::Draw_Connection(HDC hdc)
+void View::Draw_Wait_Connection(HDC hdc, RECT &rect)
 {
+	HFONT hFont = CreateFont(40, 0, 0, 0, 0, 0, 0, 0, DEFAULT_CHARSET, 0, 0, 0, VARIABLE_PITCH, "Arial Bold");	// Параметры текста (размер, шрифт и т.д.)
+	SelectObject(hdc, hFont);
+	DrawText(hdc, "Your IP-address: ", -1, &rect, DT_LEFT);
+	DeleteFont(hFont);
+	
+	
+	hFont = CreateFont(60, 0, 0, 0, 0, 0, 0, 0, DEFAULT_CHARSET, 0, 0, 0, VARIABLE_PITCH, "Arial Bold");	// Параметры текста (размер, шрифт и т.д.)
+	SelectObject(hdc, hFont);
+	DrawText(hdc, _Model->get_IP(), -1, &rect, DT_CENTER);
+	DeleteFont(hFont);
+
+	hFont = CreateFont(80, 0, 0, 0, 0, 0, 0, 0, DEFAULT_CHARSET, 0, 0, 0, VARIABLE_PITCH, "Arial Bold");	// Параметры текста (размер, шрифт и т.д.)
+	SelectObject(hdc, hFont);
+	DrawText(hdc,"Waiting for the player to connect", -1, &rect, DT_SINGLELINE | DT_CENTER | DT_VCENTER);
+	DeleteFont(hFont);
 }
 
-void View::Draw_Allocation(HDC hdc, RECT& rect)
+void View::Draw_Connection(HDC hdc, RECT& rect)
 {
+	HFONT hFont = CreateFont(40, 0, 0, 0, 0, 0, 0, 0, DEFAULT_CHARSET, 0, 0, 0, VARIABLE_PITCH, "Arial Bold");	// Параметры текста (размер, шрифт и т.д.)
+	SelectObject(hdc, hFont);
+	DrawText(hdc, "Enter the server IP address", -1, &rect, DT_LEFT);
+	DeleteFont(hFont);
 
+	hFont = CreateFont(80, 0, 0, 0, 0, 0, 0, 0, DEFAULT_CHARSET, 0, 0, 0, VARIABLE_PITCH, "Arial Bold");	// Параметры текста (размер, шрифт и т.д.)
+	SelectObject(hdc, hFont);
+	DrawText(hdc, _Model->get_IP(), -1, &rect, DT_SINGLELINE | DT_CENTER | DT_VCENTER);
+	DeleteFont(hFont);
+}
 
-
-	HBRUSH ClozeBrush = CreateSolidBrush(RGB(128, 128, 255));	// Закрытая клетка
-	HBRUSH OurShipBrush = CreateSolidBrush(RGB(255, 0, 255)); // Свой корабль
+void View::Draw_Allocation(HDC hdc)
+{
+	HBRUSH ClozeBrush = CreateSolidBrush(RGB(135, 206, 250));	// Закрытая клетка
+	HBRUSH OurShipBrush = CreateSolidBrush(RGB(0, 255, 0)); // Свой корабль
 	wchar_t c[1];
 	wchar_t num[1];
 	c[0] = 'A';
@@ -182,7 +228,6 @@ void View::Draw_Allocation(HDC hdc, RECT& rect)
 	for (int vertical = 0; vertical < 10; vertical++)
 	{
 		TextOut(hdc, MARGIN_LEFT - CELL_SIZE / 2, MARGIN_TOP + vertical * CELL_SIZE + CELL_SIZE / 4, (LPCSTR)c, 1);
-		//DrawText(hdc, (LPCSTR)c, cchText, lprc, format);
 		c[0]++;
 		for (int horizontal = 0; horizontal < 10; horizontal++)
 		{
@@ -197,7 +242,7 @@ void View::Draw_Allocation(HDC hdc, RECT& rect)
 			int bottom = vertical * CELL_SIZE + CELL_SIZE + MARGIN_TOP;
 
 			SelectBrush(hdc, ClozeBrush);
-			switch (_Model->field_my[horizontal][vertical])
+			switch (_Model->get_from_field('m', horizontal, vertical))
 			{
 			case empt: SelectBrush(hdc, ClozeBrush); break;
 			case located: SelectBrush(hdc, OurShipBrush); break;

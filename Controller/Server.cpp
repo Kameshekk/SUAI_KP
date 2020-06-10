@@ -10,7 +10,6 @@ Server::Server(Model* _Model_of_game)
 		cout << "err" << endl;
 		exit(1);
 	}
-	char IPadress[16];
 
 
 	const char* google_dns_server = "8.8.8.8";
@@ -20,7 +19,8 @@ Server::Server(Model* _Model_of_game)
 	int sock = socket(AF_INET, SOCK_DGRAM, 0);
 	if (sock < 0)
 	{
-		perror("Socket error");
+		MessageBox(_Model->hWnd, "Socket error", NULL, NULL);
+		exit(1);
 	}
 
 	memset(&serv, 0, sizeof(serv));
@@ -33,58 +33,53 @@ Server::Server(Model* _Model_of_game)
 	struct sockaddr_in name;
 	socklen_t namelen = sizeof(name);
 	err = getsockname(sock, (struct sockaddr*) & name, &namelen);
-	const char* p = inet_ntop(AF_INET, &name.sin_addr, IPadress, 100);
+	const char* p = inet_ntop(AF_INET, &name.sin_addr, _Model->IPaddress, 100);
+	int x;
 
-	if (p != NULL)
-	{
-		printf("Local ip is : %s \n", IPadress);
-	}
-	else
-	{
-		//Some error
-		printf("Error number : %d . Error message : %s \n", errno, strerror(errno));
-	}
-
-	//close(sock);
+	
 
 
 
 
 
 
-	cout << "Server's adress: " << IPadress; 
+	//cout << "Server's adress: " << IPadress; 
 	//cin.clear(); 
 	//cin.ignore(INT_MAX, '\n');
 	//cin.getline(IPadress, sizeof(IPadress));
-	address.sin_addr.S_un.S_addr = inet_addr(IPadress);
+	
+}
+
+Server::~Server()
+{
+	_Model = nullptr;
+	closesocket(Connection);
+}
+
+void Server::conect()
+{
+
+	address.sin_addr.S_un.S_addr = inet_addr(_Model->IPaddress);
 	address.sin_port = htons(9999);
 	address.sin_family = AF_INET;
-
 	int size_of_address = sizeof(address);
 
 	sListen = socket(AF_INET, SOCK_STREAM, NULL);
 	bind(sListen, (SOCKADDR*)&address, size_of_address);
 	listen(sListen, SOMAXCONN);
 
-//	Connection = accept(sListen, (SOCKADDR*)&address, &size_of_address);
-	if (Connection)
-		cout << "++" << endl;
-	else
-		cout << "error" << endl;
+	Connection = accept(sListen, (SOCKADDR*)&address, &size_of_address);
+	if (WSAGetLastError())
+	{
+		MessageBox(_Model->hWnd, "Сommunication is not established", NULL, NULL);
+		exit(1);
+	}
+	state = allocation;
 }
 
-Server::~Server()
+bool Server::sended(char* msg)
 {
-	_Model = nullptr;
-}
-
-bool Server::sended()
-{
-	char msg[256];
-	cin.clear();
-	cin.ignore(0, '\n');
-	cin.getline(msg, sizeof(msg));
-	send(Connection, msg, sizeof(msg), NULL);
+	send(Connection, msg, MESSAGE_BLOCK, NULL);
 	if (strcmp(msg,"STOP"))
 		return 1;
 	else return 0;
@@ -92,7 +87,7 @@ bool Server::sended()
 
 bool Server::recved()
 {
-	char msg[256];
+	char msg[MESSAGE_BLOCK];
 	recv(Connection, msg, sizeof(msg), NULL);
 	cout << msg << endl;
 	if (strcmp(msg, "STOP"))
@@ -100,39 +95,17 @@ bool Server::recved()
 	else return 0;
 }
 
-void Server::ClickLeft(int x, int y)
+int Server::ClickLeft(int x, int y)
 {
-	/*if (state == allocation)
-	{
-		int vertical = ((y - MARGIN_TOP) / CELL_SIZE);
-		int horisontal = ((x - MARGIN_LEFT) / CELL_SIZE);
-		if (vertical < 0 || vertical >= 10 || horisontal < 0 || horisontal >= 10)
-			return;
-	}
-	else
-	{
-		int vertical = ((y - MARGIN_TOP) / CELL_SIZE);
-		int horisontal = ((x - 2 * MARGIN_LEFT - 10 * CELL_SIZE) / CELL_SIZE);
-		if (vertical < 0 || vertical >= 10 || horisontal < 0 || horisontal >= 10)
-			return;
-
-		if (state == 1)
-		{
-			if (Hit(_Model->field_his, horisontal, vertical))
-				state = wait;
-		}
-	}*/
 	int vertical;
 	int horisontal;
 
 	switch (state)
 	{
-	case start: 
-		break;
-	case connection:  break;
+	case start:
 	case allocation:
-		if ((x > MARGIN_LEFT + 10 * CELL_SIZE + 100) && (x < MARGIN_LEFT + 10 * CELL_SIZE + 600) &&
-			(y > MARGIN_TOP) && (y > MARGIN_TOP + 210))
+		if ((x > MARGIN_LEFT + 10 * CELL_SIZE + 100) && (x < MARGIN_LEFT + 10 * CELL_SIZE + 200) &&
+			(y > MARGIN_TOP + 240) && (y < MARGIN_TOP + 300))
 		{
 			Reset();
 			break;
@@ -140,29 +113,33 @@ void Server::ClickLeft(int x, int y)
 		vertical = ((y - MARGIN_TOP) / CELL_SIZE);
 		horisontal = ((x - MARGIN_LEFT) / CELL_SIZE);
 		if (vertical < 0 || vertical >= 10 || horisontal < 0 || horisontal >= 10 || x < MARGIN_LEFT || y < MARGIN_TOP)
-			return;
-		Located(_Model->field_my, horisontal, vertical);
+			return 0;
+		if (Located(_Model->field_my, horisontal, vertical))
+			return allocation;
 		break;
 	case mov:
 		vertical = ((y - MARGIN_TOP) / CELL_SIZE);
 		horisontal = ((x - MARGIN_LEFT - 10 * CELL_SIZE - MARGIN_BETWEEN_FIELDS) / CELL_SIZE);
 		if (vertical < 0 || vertical >= 10 || horisontal < 0 || horisontal >= 10 || x < MARGIN_LEFT || y < MARGIN_TOP)
-			return;
-		Hit(_Model->field_his, horisontal, vertical);
+			return 0;
+		moving(horisontal, vertical);
 		break;
-	case wait:  break;
+	case wait:  
+		waiting();
+		break;
 	case win:  break;
 	case lose:  break;
 	default:
 		break;
+
 	}
 
 }
 
-void Server::Located(int** field, int x, int y)
+int Server::Located(int** field, int x, int y)
 {
 	if (_Model->get_from_field('m', x, y) == located)
-		return;
+		return 0;
 	if (stay == 0)
 	{
 		int cnt = 0;
@@ -175,11 +152,11 @@ void Server::Located(int** field, int x, int y)
 		if (_Model->get_from_field('m', x - 1, y + 1) == located) cnt++;
 		if (_Model->get_from_field('m', x + 1, y + 1) == located) cnt++;
 		if (cnt > 0)
-			return;
+			return 0;
 		if ((_Model->get_from_field('m', x - 1, y) == located) || (_Model->get_from_field('m', x, y - 1) == located) ||
 			(_Model->get_from_field('m', x + 1, y) == located) || (_Model->get_from_field('m', x, y + 1) == located))
 		{
-			return;
+			return 0;
 		}
 		switch (ships)
 		{
@@ -194,8 +171,6 @@ void Server::Located(int** field, int x, int y)
 		case 8: stay = 1; break;
 		case 9: stay = 1; break;
 		case 10: 
-			_Model->set_heals('m', 20);
-			state = wait;
 			break;
 		default:
 			break;
@@ -207,15 +182,22 @@ void Server::Located(int** field, int x, int y)
 		installed = 1;
 		stay--;
 		ships++;
-		return;
+		UpdateWindow(_Model->hWnd);
+		if (ships == 10)
+		{
+			state = wait;
+			return 1;
+			//UpdateWindow(_Model->hWnd);
+		}
+		return 0;
 	}
 
 	if (installed == 1)
 	{
 		if (abs(prevx1 - x) > 1 || abs(prevy1 - y) > 1)
-			return;
+			return 0;
 		if (abs(prevx1 - x) + abs(prevy1 - y) > 1)
-			return;
+			return 0;
 		int cnt = 0;
 		if (_Model->get_from_field('m', x - 1, y) == located) cnt++; 
 		if (_Model->get_from_field('m', x + 1, y) == located) cnt++;
@@ -226,21 +208,21 @@ void Server::Located(int** field, int x, int y)
 		if (_Model->get_from_field('m', x - 1, y + 1) == located) cnt++;
 		if (_Model->get_from_field('m', x + 1, y + 1) == located) cnt++;
 		if (cnt > 1)
-			return;
+			return 0;
 		prevx2 = x;
 		prevy2 = y;
 		_Model->set_on_field('m', x, y, located);
 		installed = 2;
 		stay--;
-		return;
+		return 0;
 	}
 
 	if (installed == 2)
 	{
 		if ((abs(prevx1 - x) > 1 || abs(prevy1 - y) > 1) && (abs(prevx2 - x) > 1 || abs(prevy2 - y) > 1))
-			return;
+			return 0;
 		if ((abs(prevx1 - x) + abs(prevy1 - y) > 1) && (abs(prevx2 - x) + abs(prevy2 - y)) > 1)
-			return;
+			return 0;
 		int cnt = 0;
 		if (_Model->get_from_field('m', x - 1, y) == located) cnt++;
 		if (_Model->get_from_field('m', x + 1, y) == located) cnt++;
@@ -252,7 +234,7 @@ void Server::Located(int** field, int x, int y)
 		if (_Model->get_from_field('m', x - 1, y + 1) == located) cnt++;
 		if (_Model->get_from_field('m', x + 1, y + 1) == located) cnt++;
 		if (cnt > 1)
-			return;
+			return 0;
 		int flag = 0;
 		if ((_Model->get_from_field('m', x - 2, y) == located) && (_Model->get_from_field('m', x - 1, y) == located) ||
 			(_Model->get_from_field('m', x + 2, y) == located) && (_Model->get_from_field('m', x + 1, y) == located) ||
@@ -265,15 +247,15 @@ void Server::Located(int** field, int x, int y)
 			_Model->set_on_field('m', x, y, located);
 			installed = 3;
 			stay--;
-			return;
+			return 0;
 		}
 	}
 	if (installed == 3)
 	{
 		if ((abs(prevx1 - x) > 1 || abs(prevy1 - y) > 1) && (abs(prevx2 - x) > 1 || abs(prevy2 - y) > 1) && (abs(prevx3 - x) > 1 || abs(prevy3 - y) > 1))
-			return;
+			return 0;
 		if ((abs(prevx1 - x) + abs(prevy1 - y) > 1) && (abs(prevx2 - x) + abs(prevy2 - y) > 1) && (abs(prevx3 - x) + abs(prevy3 - y)) > 1)
-			return;
+			return 0;
 		int cnt = 0;
 		if (_Model->get_from_field('m', x - 1, y) == located) cnt++;
 		if (_Model->get_from_field('m', x + 1, y) == located) cnt++;
@@ -285,7 +267,7 @@ void Server::Located(int** field, int x, int y)
 		if (_Model->get_from_field('m', x - 1, y + 1) == located) cnt++;
 		if (_Model->get_from_field('m', x + 1, y + 1) == located) cnt++;
 		if (cnt > 1)
-			return;
+			return 0;
 		int flag = 0;
 		if ((_Model->get_from_field('m', x - 2, y) == located) && (_Model->get_from_field('m', x - 1, y) == located) ||
 			(_Model->get_from_field('m', x + 2, y) == located) && (_Model->get_from_field('m', x + 1, y) == located) ||
@@ -300,29 +282,138 @@ void Server::Located(int** field, int x, int y)
 			stay--;
 		}
 	}
+	return 0;
 }
 
-int Server::Hit(int** field, int x, int y)
+void Server::Send_Model(Model* Model)
 {
+	char msg[256];
+	int z = 0;
+	for (int i = 0; i < 1; i++)
+	{
+		for (int j = 0; j < 10; j++)
+		{
+			msg[z++] = '0' + _Model->get_from_field('m', i, j);
+		}
+	}
+	sended(msg);
+}
+
+void Server::Recv_Model(Model* Model)
+{
+	char msg[MESSAGE_BLOCK];
+	int z = 0;
+	recv(Connection, msg, MESSAGE_BLOCK, NULL);
+	if (WSAGetLastError())
+	{
+		MessageBox(_Model->get_HWND(), "Disconnect", NULL, NULL);
+		exit(1);
+	}
+	for (int i = 0; i < 10; i++)
+		for (int j = 0; j < 10; j++)
+			_Model->set_on_field('h', i, j, msg[z++] - '0');
+	state = wait;
+}
+
+void Server::ready()
+{
+	_Model->set_heals('m', 20);
+	char msg[MESSAGE_BLOCK];
+	recv(Connection, msg, sizeof(msg), NULL);
+	if (WSAGetLastError())
+	{
+		MessageBox(_Model->hWnd, "Disconnect", NULL, NULL);
+		exit(1);
+	}
+	Recv_Model(_Model);
+	state = mov;
+}
+
+
+int Server::Hit(int** field, int x, int y, char who)
+{
+	int flag = 0;
 	switch (field[x][y])
 	{
-	case empt: _Model->set_on_field('h', x, y, located); return 0; break;
-	case located: _Model->set_on_field('h', x, y, damaged); 
+	case empt: _Model->set_on_field(who, x, y, miss); flag = 0; break;
+	case located: _Model->set_on_field(who, x, y, damaged);
 		int copy_field[10][10];
 		for (int i = 0; i < 10; i++)
 			for (int j = 0; j < 10; j++)
 				copy_field[i][j] = field[i][j];
 		if (check_on_kill(copy_field, x, y))
-			kills('h', x, y);
-
-		return 1; break;
-	case damaged: _Model->set_on_field('h', x, y, damaged); break;	// Невозможно
-	case miss: _Model->set_on_field('h', x, y, miss); break;	// Невозможно
-	case kill: _Model->set_on_field('h', x, y, kill); break;	// Невозможно
+		{
+			kills(who, x, y);
+			flag = 2;
+		}
+		else
+			flag = 1; 
+		break;
 	default:
 		break;
 	}
-	return 1;
+	//flag = 1;
+	return flag;
+}
+
+void Server::moving(int x, int y)
+{
+	if ((_Model->field_his[x][y] == kill) || (_Model->field_his[x][y] == damaged))
+		return;
+	char msg_out[MESSAGE_BLOCK];
+	msg_out[1] = x + '0';
+	msg_out[2] = y + '0';
+	switch (Hit(_Model->field_his, x, y, 'h'))
+	{
+	case 0:
+		msg_out[0] = '0';
+		sended(msg_out);
+		state = wait;
+		return;
+	case 1:
+		msg_out[0] = '1';
+		sended(msg_out);
+		_Model->heals_his--;
+		break;
+	case 2:
+		msg_out[0] = '2';
+		sended(msg_out);
+		_Model->heals_his--;
+		break;
+	}
+}
+
+void Server::waiting()
+{
+	int x = -1, y = -1;
+	char msg_in[MESSAGE_BLOCK];
+	char msg_out[MESSAGE_BLOCK];
+	recv(Connection, msg_in, MESSAGE_BLOCK, NULL);
+	if (WSAGetLastError())
+	{
+		MessageBox(_Model->get_HWND(), "Disconnect", NULL, NULL);
+		exit(1);
+	}
+	x = msg_in[0] - '0';
+	y = msg_in[1] - '0';
+	switch (Hit(_Model->field_my, x, y, 'm'))
+	{
+	case 0:
+		msg_out[0] = '0';
+		sended(msg_out);
+		state = mov;
+		return;
+	case 1:
+		msg_out[0] = '1';
+		sended(msg_out);
+		_Model->heals_my--;
+		break;
+	case 2:
+		msg_out[0] = '2';
+		sended(msg_out);
+		_Model->heals_my--;
+		break;
+	}
 }
 
 int Server::check_on_kill(int field[10][10], int x, int y)
@@ -357,18 +448,3 @@ int Server::check_on_kill(int field[10][10], int x, int y)
 	return 1;
 }
 
-void Server::kills(char who, int x, int y)
-{
-	//if (_Model->get_from_field(x - 1, y, who) == located)
-		
-	_Model->set_on_field(who, x, y, kill);
-	if (_Model->get_from_field(who, x - 1, y) == damaged)
-		kills(who, x - 1, y);
-	if (_Model->get_from_field(who, x + 1, y) == damaged)
-		kills(who, x + 1, y);
-	if (_Model->get_from_field(who, x, y - 1) == damaged)
-		kills(who, x, y - 1);
-	if (_Model->get_from_field(who, x, y + 1) == damaged)
-		kills(who, x, y + 1);
-	return;
-}

@@ -6,7 +6,7 @@
 #define IDS_SHIPS                       102
 // Next default values for new objects
 // 
-int Game_state;
+
 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS

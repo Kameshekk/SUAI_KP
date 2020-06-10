@@ -48,3 +48,20 @@ void Controller::Reset()
 	}
 }
 
+
+void Controller::kills(char who, int x, int y)
+{
+	//if (_Model->get_from_field(x - 1, y, who) == located)
+
+	_Model->set_on_field(who, x, y, kill);
+	if (_Model->get_from_field(who, x - 1, y) == damaged)
+		kills(who, x - 1, y);
+	if (_Model->get_from_field(who, x + 1, y) == damaged)
+		kills(who, x + 1, y);
+	if (_Model->get_from_field(who, x, y - 1) == damaged)
+		kills(who, x, y - 1);
+	if (_Model->get_from_field(who, x, y + 1) == damaged)
+		kills(who, x, y + 1);
+	return;
+}
+

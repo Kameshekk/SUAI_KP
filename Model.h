@@ -7,7 +7,9 @@
 #include <ws2tcpip.h>
 #pragma comment(lib, "ws2_32.lib")
 #pragma warning(disable: 4996)
+#include "resource.h"
 //#include "View.h"
+
 
 #define WIDTH 1200
 #define HEIGHT 600
@@ -19,6 +21,7 @@
 #define CELL_SIZE 30
 
 using namespace std;
+
 
 enum Ship_state
 {
@@ -33,12 +36,15 @@ class Model
 {
     //View* View_of_game;
     HWND hWnd;
-public:
-    //Ship_state state_ship;
     int heals_my;
     int heals_his;
     int** field_my;
     int** field_his;
+    char IPaddress[16];
+public:
+    //Ship_state state_ship;
+    friend class Server;
+    friend class Client;
     Model(HWND _hWnd);
     ~Model();
     bool check();
@@ -46,6 +52,9 @@ public:
     int get_heals(char who);
     int set_on_field(char who, int horizontal, int vertical, int set_cell);
     int get_from_field(char who, int horizontal, int vertical);
+    void set_IP(char* _IPaddress);
+    char* get_IP();
+    HWND get_HWND();
 };
 
 #endif

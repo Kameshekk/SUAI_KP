@@ -8,10 +8,18 @@ class Client : public Controller
 {
 	SOCKET sListen;
 public:
-	Client();
+	Client(Model* _Model);
 	~Client();
-	bool sended();
+	void conect();
+	bool sended(char* msg);
 	bool recved();
+	int Located(int** field, int x, int y);
+	void Send_Model(Model* Model);
+	void Recv_Model(Model* Model);
+	void moving(int x, int y);
+	void waiting();
+	void ready();
+	int ClickLeft(int x, int y);
 
 };
 

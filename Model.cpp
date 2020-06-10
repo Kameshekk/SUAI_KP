@@ -20,6 +20,7 @@ Model::Model(HWND _hWnd)
 		for (int j = 0; j < 10; j++)
 			field_his[i][j] = empt;
 	}
+	IPaddress[0] = '\0';
 }
 
 
@@ -84,6 +85,7 @@ int Model::set_on_field(char who, int horizontal, int vertical, int set_cell)
 		break;
 	}
 	UpdateWindow(hWnd);
+	InvalidateRect(hWnd, NULL, false);
 	return tmp;
 }
 
@@ -103,4 +105,20 @@ int Model::get_from_field(char who, int horizontal, int vertical)
 		return -1;
 		break;
 	}
+}
+
+void Model::set_IP(char* _IPaddress)
+{
+	strcpy(IPaddress, _IPaddress);
+	UpdateWindow(hWnd);
+}
+
+char* Model::get_IP()
+{
+	return IPaddress;
+}
+
+HWND Model::get_HWND()
+{
+	return hWnd;
 }

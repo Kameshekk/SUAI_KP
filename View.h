@@ -21,10 +21,11 @@ public:
 	View(Model* _Model_of_game);
 	~View();
 	// Отображает игровое поле в указанном графическом контексте
-	void Draw_Start(HDC hdc, RECT& rect);
-	void Draw_Connection(HDC hdc);
-	void Draw_Allocation(HDC hdc, RECT& rect);
-	void Draw_Move(HDC hdc);
+	void Draw_Start(HDC hdc);
+	void Draw_Wait_Connection(HDC hdc, RECT& rect);
+	void Draw_Connection(HDC hdc, RECT& rect);
+	void Draw_Allocation(HDC hdc);
+	void Draw(HDC hdc, RECT& rect, char select);
 	void Draw_Wait(HDC hdc);
 	void Draw_Win(HDC hdc);
 	void Draw_Lose(HDC hdc);
