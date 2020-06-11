@@ -12,7 +12,6 @@ public:
 	~Client();
 	void conect();
 	bool sended(char* msg);
-	bool recved();
 	int Located(int** field, int x, int y);
 	void Send_Model(Model* Model);
 	void Recv_Model(Model* Model);

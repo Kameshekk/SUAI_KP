@@ -13,12 +13,6 @@ Client::Client(Model* _Model_of_game)
 		exit(1);
 	}
 
-	SOCKADDR_IN address;
-	//cout << "Server's adress: ";
-	//cin.clear();
-	//cin.ignore(INT_MAX, '\n');
-	//cin.getline(_Model->IPaddress, sizeof(IPaddress));
-
 }
 
 Client::~Client()
@@ -52,15 +46,6 @@ bool Client::sended(char* msg)
 	else return 0;
 }
 
-bool Client::recved()
-{
-	char msg[MESSAGE_BLOCK];
-	recv(Connection, msg, sizeof(msg), NULL);
-	cout << msg << endl;
-	if (strcmp(msg, "STOP"))
-		return 1;
-	else return 0;
-}
 
 int Client::Located(int** field, int x, int y)
 {
@@ -113,7 +98,7 @@ int Client::Located(int** field, int x, int y)
 		UpdateWindow(_Model->hWnd);
 		if (ships == 10)
 		{
-			state = wait;
+			state = wait_game;
 			return 1;
 			//UpdateWindow(_Model->hWnd);
 		}
@@ -231,7 +216,7 @@ void Client::Recv_Model(Model* Model)
 {
 	char msg[MESSAGE_BLOCK];
 	int z = 0;
-	recv(Connection, msg, MESSAGE_BLOCK, NULL);
+	recv(Connection, msg, MESSAGE_BLOCK, NULL); 
 	if (WSAGetLastError())
 	{
 		MessageBox(_Model->get_HWND(), "Disconnect", NULL, NULL);
@@ -246,14 +231,25 @@ void Client::Recv_Model(Model* Model)
 
 void Client::moving(int x, int y)
 {
-	if ((_Model->field_his[x][y] == kill) || (_Model->field_his[x][y] == damaged))
+	if ((_Model->field_his[x][y] == kill) || (_Model->field_his[x][y] == damaged) || (_Model->field_his[x][y] == miss))
 		return;
 	char msg_out[MESSAGE_BLOCK];
-	char msg_in[MESSAGE_BLOCK];
 	msg_out[0] = x + '0';
 	msg_out[1] = y + '0';
 	sended(msg_out);
-	recv(Connection, msg_in, MESSAGE_BLOCK, NULL);
+	//recv(Connection, msg_in, MESSAGE_BLOCK, NULL);
+	In_Recv* st_msg = new In_Recv(Connection, msg_in, MESSAGE_BLOCK, NULL);
+	hThread = CreateThread(NULL, NULL, ((LPTHREAD_START_ROUTINE)recved), (st_msg), NULL, NULL);
+	int i = 0;
+	while ((msg_in[0] < '0') || (msg_in[0] > '9'))
+	{
+		Sleep(100);
+		if (i == 5000)
+			break;
+		i++;
+	}
+	CloseHandle(hThread);
+	delete st_msg;
 	if (WSAGetLastError())
 	{
 		MessageBox(_Model->get_HWND(), "Disconnect", NULL, NULL);
@@ -265,7 +261,7 @@ void Client::moving(int x, int y)
 	case 0:
 		_Model->set_on_field('h', x, y, miss);
 		state = wait;
-		return;
+		break;
 	case 1:
 		_Model->set_on_field('h', x, y, damaged);
 		_Model->heals_his--;
@@ -276,13 +272,30 @@ void Client::moving(int x, int y)
 		kills('h', x, y);
 		break;
 	}
+	msg_in[0] = -1;
+	if (_Model->heals_his == 0)
+		state = win;
 }
 
 void Client::waiting()
 {
 	int x = -1, y = -1;
-	char msg_in[MESSAGE_BLOCK];
-	recv(Connection, msg_in, MESSAGE_BLOCK, NULL);
+	In_Recv* st_msg = new In_Recv(Connection, msg_in, MESSAGE_BLOCK, NULL);
+	if(flag_waitrecv == 0)
+		hThread = CreateThread(NULL, NULL, ((LPTHREAD_START_ROUTINE)recved), (st_msg), NULL, NULL);
+	int i = 0;
+	Sleep(100);
+	if ((msg_in[0] < '0') || (msg_in[0] > '9'))
+	{
+		flag_waitrecv = 1;
+		return;
+	}
+	else
+	{
+		flag_waitrecv = 0;
+		CloseHandle(hThread);
+	}
+	delete st_msg;
 	if (WSAGetLastError())
 	{
 		MessageBox(_Model->get_HWND(), "Disconnect", NULL, NULL);
@@ -294,7 +307,8 @@ void Client::waiting()
 	{
 	case 0:
 		state = mov;
-		return;
+		_Model->set_on_field('m', x, y, miss);
+		break;
 	case 1:
 		_Model->heals_my--;
 		_Model->set_on_field('m', x, y, damaged);
@@ -305,12 +319,16 @@ void Client::waiting()
 		kills('m', x, y);
 		break;
 	}
+	msg_in[0] = -1;
+	if (_Model->heals_my == 0)
+		state = lose;
 }
 
 void Client::ready()
 {
 	_Model->set_heals('m', 20);
-	char msg[MESSAGE_BLOCK] = "READY";
+	char msg[MESSAGE_BLOCK];
+	recv(Connection, msg, MESSAGE_BLOCK, NULL);
 	send(Connection, msg, MESSAGE_BLOCK, NULL);
 	if (WSAGetLastError())
 	{

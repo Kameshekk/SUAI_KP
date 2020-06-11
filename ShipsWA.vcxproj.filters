@@ -59,9 +59,6 @@
     <ClInclude Include="Controller\Server.h">
       <Filter>Файлы заголовков\Controller</Filter>
     </ClInclude>
-    <ClInclude Include="resource2.h">
-      <Filter>Файлы заголовков</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="ShipsWA.rc">

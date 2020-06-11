@@ -3,15 +3,6 @@
 #include "Controller/Server.h"
 #include "Controller/Client.h"
 #define FIRST_TIMER 1 
-int nTimerID = 0; 
-// main.cpp : Defines the entry point for the application.
-//
-
-// main.cpp : Defines the entry point for the application.
-//
-
-//#include "framework.h"
-
 
 #define IDT_STEP_TIMER 1
 
@@ -23,6 +14,8 @@ using namespace std;
 HINSTANCE hInst;                                // Глобальная переменная для дескриптора приложения
 WCHAR szTitle[MAX_LOADSTRING];                  // Название, которое написано сверху
 WCHAR szWindowClass[MAX_LOADSTRING];            // Имя класса окна
+
+int nTimerID = 0;
 
 View* _View;										// Указатель на объект графической оболочки приложения
 Model* _Model;
@@ -168,39 +161,13 @@ void enter(char var)
 
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
-	HDC hDC, hdcMem;
-	BITMAP bm;
-	HGDIOBJ hbmOld;
-	PAINTSTRUCT ps; 
-	HBITMAP hBitMap;
 	switch (message)
 	{
 	case WM_CREATE:
 
-		static HWND OK = CreateWindow("BUTTON", "Game", WS_CHILD | WS_VISIBLE, 550, 500, 100, 30, hWnd, (HMENU)1001, hInst, NULL);
 		_Model = new Model(hWnd);
 		_View = new View(_Model);
 		break;
-
-	case WM_COMMAND:
-	{
-		int wmId = LOWORD(wParam);
-		if (wParam == 1001)
-		{
-			switch (_Controller->get_state())
-			{
-			case start: _Controller->set_state(allocation); break;
-			case allocation: _Controller->set_state(mov); break;
-			case mov: _Controller->set_state(wait); break;
-			case wait: _Controller->set_state(start); break;
-
-			default:
-				break;
-			}
-		}
-		UpdateWindow(hWnd);
-	}
-	break;
 	case WM_KEYDOWN:
 		switch (wParam)
 		{
@@ -235,7 +202,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		break;
 	case WM_PAINT:
 	{
-		//SetClientSize(hWnd, gameUI->GetWidth(), gameUI->GetHeight());
 
 		PAINTSTRUCT ps;
 		HDC hdc = BeginPaint(hWnd, &ps);
@@ -267,16 +233,16 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			case wait_connection: _View->Draw_Wait_Connection(memDC, rcClientRect); flag = 1; break;
 			case connection: _View->Draw_Connection(memDC, rcClientRect); break;
 			case allocation:  _View->Draw_Allocation(memDC); break;
+			case wait_game: _View->Draw(memDC, rcClientRect, 'w'); break;
 			case mov: _View->Draw(memDC, rcClientRect, 'm'); break;
 			case wait: _View->Draw(memDC, rcClientRect, 'w'); break;
-			case win:  break;
-			case lose:  break;
+			case win: _View->Draw_Win(memDC, rcClientRect); break;
+			case lose:  _View->Draw_Lose(memDC, rcClientRect); break;
 			default:
 				break;
 			}
 		}
 		
-		//_View->Draw_Move(memDC);
 
 		
 		// OK, everything is drawn into memory DC, 
@@ -299,9 +265,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		//HWND OK = CreateWindow("BUTTON","Game",WS_CHILD | WS_VISIBLE, 550, 500, 100, 30, hWnd, (HMENU)1001, hInst, NULL);
 	}
 	break;
-	case WM_DESTROY:
-		PostQuitMessage(0);
-		break;
 	case WM_LBUTTONDOWN:
 	{
 		int mouseX = GET_X_LPARAM(lParam);
@@ -342,28 +305,16 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		InvalidateRect(hWnd, NULL, false);
 		break;
 	}
+	case WM_DESTROY:
+	{
+		delete _View;
+		delete _Controller;
+		delete _Model;
+		PostQuitMessage(0);
+		break;
+	}
 	default:
 		return DefWindowProc(hWnd, message, wParam, lParam);
 	}
 	return 0;
-}
-
-// Message handler for about box.
-INT_PTR CALLBACK About(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
-{
-	UNREFERENCED_PARAMETER(lParam);
-	switch (message)
-	{
-	case WM_INITDIALOG:
-		return (INT_PTR)TRUE;
-
-	case WM_COMMAND:
-		if (LOWORD(wParam) == IDOK || LOWORD(wParam) == IDCANCEL)
-		{
-			EndDialog(hDlg, LOWORD(wParam));
-			return (INT_PTR)TRUE;
-		}
-		break;
-	}
-	return (INT_PTR)FALSE;
 }

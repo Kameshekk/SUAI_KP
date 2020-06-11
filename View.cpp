@@ -6,6 +6,11 @@ View::View(Model* _Model_of_game)
 	_Model = _Model_of_game;
 }
 
+View::~View()
+{
+	_Model = nullptr;
+}
+
 void View::Draw(HDC hdc, RECT& rect, char select)
 {
 
@@ -126,12 +131,30 @@ void View::Draw(HDC hdc, RECT& rect, char select)
 }
 
 
-void View::Draw_Win(HDC hdc)
+void View::Draw_Win(HDC hdc, RECT& rect)
 {
+	HFONT hFont = CreateFont(100, 0, 0, 0, 0, 0, 0, 0, DEFAULT_CHARSET, 0, 0, 0, VARIABLE_PITCH, "Arial Bold");	// Параметры текста (размер, шрифт и т.д.)
+	SelectObject(hdc, hFont);
+	DrawText(hdc, "Your win", -1, &rect, DT_SINGLELINE | DT_CENTER | DT_VCENTER);
+	DeleteFont(hFont);
+
+	hFont = CreateFont(40, 0, 0, 0, 0, 0, 0, 0, DEFAULT_CHARSET, 0, 0, 0, VARIABLE_PITCH, "Arial Bold");	// Параметры текста (размер, шрифт и т.д.)
+	SelectObject(hdc, hFont);
+	DrawText(hdc, "Close the game", -1, &rect, DT_SINGLELINE | DT_CENTER | DT_BOTTOM);
+	DeleteFont(hFont);
 }
 
-void View::Draw_Lose(HDC hdc)
+void View::Draw_Lose(HDC hdc, RECT& rect)
 {
+	HFONT hFont = CreateFont(100, 0, 0, 0, 0, 0, 0, 0, DEFAULT_CHARSET, 0, 0, 0, VARIABLE_PITCH, "Arial Bold");	// Параметры текста (размер, шрифт и т.д.)
+	SelectObject(hdc, hFont);
+	DrawText(hdc, "Your lose", -1, &rect, DT_SINGLELINE | DT_CENTER | DT_VCENTER);
+	DeleteFont(hFont);
+
+	hFont = CreateFont(40, 0, 0, 0, 0, 0, 0, 0, DEFAULT_CHARSET, 0, 0, 0, VARIABLE_PITCH, "Arial Bold");	// Параметры текста (размер, шрифт и т.д.)
+	SelectObject(hdc, hFont);
+	DrawText(hdc, "Close the game", -1, &rect, DT_SINGLELINE | DT_CENTER | DT_BOTTOM);
+	DeleteFont(hFont);
 }
 
 void View::Draw_Start(HDC hdc)
@@ -267,9 +290,9 @@ void View::Draw_Allocation(HDC hdc)
 	DrawText(hdc, "\n2. Place three-decked ships", -1, &Text, DT_LEFT);
 	DrawText(hdc, "\n\n3. Place two-decked ships", -1, &Text, DT_LEFT);
 	DrawText(hdc, "\n\n\n4. Place single-deck ships", -1, &Text, DT_LEFT);
+	DrawText(hdc, "\n\n\n\n5. Wait", -1, &Text, DT_LEFT);
 
 
-	//HBRUSH ResetBrush = CreateSolidBrush(RGB(240, 128, 128));
 	HBRUSH ResetBrush = CreateSolidBrush(RGB(240, 0, 50));
 	SelectObject(hdc, ResetBrush);
 	RECT ResetRect;

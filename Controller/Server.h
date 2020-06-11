@@ -13,7 +13,6 @@ public:
 	~Server();
 	void conect();
 	bool sended(char* msg);
-	bool recved();
 	int ClickLeft(int x, int y);
 	int Located(int** field, int x, int y);
 	void Send_Model(Model* Model);

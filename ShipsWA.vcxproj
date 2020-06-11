@@ -152,7 +152,6 @@
     <ClInclude Include="Controller\Server.h" />
     <ClInclude Include="Model.h" />
     <ClInclude Include="resource.h" />
-    <ClInclude Include="resource2.h" />
     <ClInclude Include="View.h" />
   </ItemGroup>
   <ItemGroup>

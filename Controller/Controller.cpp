@@ -10,10 +10,25 @@ Controller::Controller()
 	prevx2 = 0;
 	prevy2 = 0;
 	prevx3 = 0;
-	prevy3 = 0;
+	prevy3 = 0; 
+	flag_waitrecv = 0;
+	hThread = 0;
 }
 
-Controller::~Controller() { }
+Controller::~Controller() 
+{
+	state = start;
+	stay = 0;
+	ships = 0;
+	prevx1 = 0;
+	prevy1 = 0;
+	prevx2 = 0;
+	prevy2 = 0;
+	prevx3 = 0;
+	prevy3 = 0;
+	flag_waitrecv = 0;
+	hThread = 0;
+}
 
 State_of_game Controller::get_state()
 {
@@ -65,3 +80,23 @@ void Controller::kills(char who, int x, int y)
 	return;
 }
 
+In_Recv::In_Recv(SOCKET _sock, char* _msg, int _lenght, int _flags)
+{
+	sock = _sock;
+	msg = _msg;
+	lenght = _lenght;
+	flags = _flags;
+}
+
+In_Recv::~In_Recv()
+{
+	SOCKET sock = 0;
+	char* msg = nullptr;
+	int lenght = 0;
+	int flags = 0;
+}
+
+void recved(In_Recv* st_msg)
+{
+	recv(st_msg->sock, st_msg->msg, 256, NULL);
+}
